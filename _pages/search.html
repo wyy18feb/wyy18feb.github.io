@@ -1,0 +1,16 @@
+---
+layout: post
+title: "Search"
+permalink: /search/
+---
+<link rel="stylesheet" href="{{ "/assets/css/custom.css" | relative_url }}">
+<div class="form-group">
+    <input class="form-control" type="text" id="search-input" placeholder="Search blog posts..">
+</div>
+
+<ul class="list-group" id="results-container"></ul>
+
+<!-- script pointing to jekyll-search.js -->
+<script src="{{ "/assets/vendor/jquery/jquery.min.js" | relative_url }}"></script>
+<script src="{{ "/assets/js/simple-jekyll-search.min.js" | relative_url }}"></script>
+<script src="{{ "/assets/js/config.js" | relative_url }}"></script>
