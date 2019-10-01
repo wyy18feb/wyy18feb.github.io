@@ -6,6 +6,10 @@ title: "First Step in Go"
 
 # Introduction
 
+> Go is an open source programming language that makes it easy to build simple, reliable, and efficient software.
+
+![Go](https://golang.org/lib/godoc/images/home-gopher.png)
+
 This is my learning record of [Programming with Google Go](https://www.coursera.org/specializations/google-golang) on [Coursera](https://coursera.org). Here I take notes of the courses.
 
 For details of documentation, please visit [golang.org/doc](https://golang.org/doc).
@@ -403,3 +407,127 @@ var appleNum int
 num, err := fmt.Scan(&appleNum)
 fmt.Println(appleNum)
 ```
+
+## Module 3: Composite Data Types
+
+### M3.1.1: Arrays
+
+Arrays are fixed-length series of elements of a chosen type. Elements are initialized to zero value.
+
+```go
+var x [5]int
+x[0] = 2
+
+// pre-defined with values
+var x [5]int = [5]{1, 2, 3, 4, 5}
+
+// ... for size in array literal infers size from number of initializers
+x := [...]int{1, 2, 3, 4}
+```
+
+Iterating through Arrays using for loops:
+
+```go
+x := [3]{1, 2, 3}
+for i, v range x {
+    fmt.Println(i, v)  // i is index, v is value
+}
+```
+
+### M3.1.2: Slices
+
+Slices are a "window" on an underlying array. A slice has 3 properties:
+- Pointer (the start of the slice)
+- Length (the number of elements in the slice)
+- Capacity (the maximum number of elements)
+
+```go
+arr := [...]string{"a", "b", "c", "d", "e", "f", "g"}
+s1 := arr[1:3]  // b, c
+s2 := arr[2:5]  // c, d, e
+fmt.Println(len(s1), cap(s1)) // 2, 6
+fmt.Println(len(s2), cap(s2)) // 3, 5
+
+// slices are the references of the array
+s1[1] = "z"  // change on the slice results in change on the array
+fmt.Println(s1[1], s2[0], arr[2])  // z, z, z
+```
+
+Slice Literals creates the underlying array and creates a slice to reference it. Slice points to the start of the array, length is capacity.
+
+```go
+sli := []int{1, 2, 3}  // nothing in the brackets, so it must be a slice
+```
+
+### M3.1.3: Variable Slices
+
+**Make()** function creates a slice (and array).
+
+```go
+sli := make([]int, 10)  // length = capacity = 10
+sli := make([]int, 10, 15)  // length = 10, capacity = 15
+```
+
+**Append()** function adds elements to the end of a slice and increases the size of it.
+
+```go
+sli := make([]int, 0, 3)  // length = 0, capacity = 3
+sli = append(sli, 100)  // length = 1, capacity = 3
+```
+
+### M3.2.1: Hash Tables
+
+Hash Table contains **key/value** pairs. Each value is associated with a unique key. **Hash function** is used to compute the **slot** for a key.
+
+![Hash Table in Go](https://miro.medium.com/max/315/1*FH2BzH1l5D7C18Fd7U0JVQ.png)
+
+Hash Tables may have collisions but usually very rare.
+
+### M3.2.2: Maps
+
+Maps are implementation of a hash table.
+
+```go
+var idMap map[string]int
+idMap = make(map[string]int)  // make an empty map
+
+idMap := map[string]int {"wyy18feb": 123}  // initialize a map
+
+fmt.Println(idMap["wyy18feb"])  // get the value by key, returns zero if key is not present
+
+idMap["tale"] = 456  // add or update a key/value pair
+
+delete(idMap, "tale")  // delete a key
+
+id, p := idMap["wyy18feb"]  // id is value, p is presence of key
+fmt.Println(id, p)  // 123, true
+```
+
+Iterating through a Map using for loops:
+
+```go
+for key, value := idMap {
+    fmt.Println(key, value)
+}
+```
+
+### M3.3.1 Structs
+
+```go
+type struct Person {
+    name string
+    addr string
+    phone string
+}
+var p1 Person
+
+// initialize a struct
+p1 := new(Person)  // initialize fields to zero
+p1 := Person(name: "wyy18feb", addr: "a st.", phone: "123")  // initialize using a struct literal
+
+// access a struct
+p1.name = "wyy18feb"
+x := p1.addr
+```
+
+## Module 4: Protocols and Formats
