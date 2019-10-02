@@ -768,7 +768,9 @@ func main() {
 ### M2.1.1: First-Class Values
 
 Functions are first-class.
+
 - Variables as Functions
+
 ```go
 func incFn(x int) int {
     return x + 1
@@ -780,7 +782,9 @@ func main() {
     fmt.Println(funcVar(0))
 }
 ```
+
 - Functions as Arguments
+
 ```go
 func applyIt(foo func(int) int, val int) int {
     return foo(val)
@@ -794,7 +798,9 @@ func main() {
     fmt.Println(applyIt(dec, 1))  // 0
 }
 ```
+
 - Anonymous Functions
+
 ```go
 func applyIt(foo func(int) int, val int) int {
     return foo(val)
