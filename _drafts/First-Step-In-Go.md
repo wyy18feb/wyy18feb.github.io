@@ -514,7 +514,7 @@ for key, value := idMap {
 ### M3.3.1 Structs
 
 ```go
-type struct Person {
+type Person struct {
     name string
     addr string
     phone string
@@ -523,7 +523,7 @@ var p1 Person
 
 // initialize a struct
 p1 := new(Person)  // initialize fields to zero
-p1 := Person(name: "wyy18feb", addr: "a st.", phone: "123")  // initialize using a struct literal
+p1 := Person{name: "wyy18feb", addr: "a st.", phone: "123"}  // initialize using a struct literal
 
 // access a struct
 p1.name = "wyy18feb"
@@ -531,3 +531,98 @@ x := p1.addr
 ```
 
 ## Module 4: Protocols and Formats
+
+### M4.1.1: RFCs
+
+**Requests for Comments** (RFC) are definitions of Internet protocols and formats:
+- HTML (1866)
+- URI (3986)
+- HTTP (2616)
+
+Protocol Packages:
+
+```go
+import (
+    "net"
+    "net/http"
+)
+
+resp, err := http.Get("wyy18feb.github.io")
+resp, err := net.Dial("tcp", "wyy18feb.github.io:443")
+```
+
+### M4.1.2: JSON
+
+JSON Properties:
+- All Unicode
+- Fairly compact representation
+- Types can be combined recursively
+
+JSON Marshalling && Unmarshalling:
+
+```go
+import "json"
+
+// Here the properties must be first captitalized
+// or the json.Marshal cannot export them
+type Person struct {
+    Name  string  `json:"name"`
+    Addr  string  `json:"addr"`
+    Phone string  `json:"phone"`
+}
+
+p1 := Person{Name: "wyy18feb", Addr: "a st.", Phone: "123"}
+barr, err := json.Marshal(p1)
+if err != nil {
+    fmt.Println("error:", err)
+}
+fmt.Printf("%s", barr)  // {"name":"wyy18feb","addr":"a st.","phone":"123"}
+
+var p2 Person
+err = json.Unmarshal(barr, &p2)
+if err != nil {
+    fmt.Println("error:", err)
+}
+fmt.Printf("%s\n", p2)  // {wyy18feb a st. 123}
+```
+
+### M4.2.1: File Access, ioutil
+
+Files:
+- Linear access, not random access (mechanical delay)
+- Basic operations:
+	1. Open
+	2. Read
+	3. Write
+	4. Close
+	5. Seek
+
+Ioutil Package:
+
+```go
+import "io/ioutil"
+
+dat, err := ioutil.ReadFile("test.txt")  // large files may cause a problem
+err := ioutil.WriteFile("outfile.txt", dat, 0777)
+```
+
+### M4.2.2: File Access, os
+
+Os Package:
+
+```go
+import os
+
+// read 10 bytes from the file dt.txt
+f, err := os.Open("dt.txt")
+barr := make([]byte, 10)
+nb, err := f.Read(barr)
+f.Close()
+
+// create a file and write something into it
+f, err := os.Create("outfile.txt")
+barr := []byte{1, 2, 3}
+nb, err := f.Write(barr)
+nb, err := f.WriteString("Hi")
+f.Close()
+```
