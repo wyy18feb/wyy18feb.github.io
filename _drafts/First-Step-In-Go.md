@@ -1159,7 +1159,131 @@ if err != nil {
 }
 ```
 
+# Concurrency in Go
 
+## Module1: Why Use Concurrency?
+
+### M1.1.1: Parallel Execution
+
+Parallel Execution: 2 programs execute in parallel (at exactly the same time).
+
+### M1.1.2: Von Neumann Bottleneck
+
+The von Neumann bottleneck is the idea that computer system throughput is limited due to the relative ability of processors compared to top rates of data transfer. According to this description of computer architecture, a processor is idle for a certain amount of time while memory is accessed.
+
+### M1.1.3: Power Wall
+
+- Transistors consume power when they switch
+- Increasing transistor density leads to increased power consumption
+- High power leads to high temperature
+- Air cooling (fans) can only remove so much heat
+
+### M1.2.1: Concurrent vs Parallel
+
+![Concurrent vs Parallel](https://techdifferences.com/wp-content/uploads/2017/12/Untitled.jpg)
+
+Concurrent: start and end time overlap. Concurrent tasks may be executed on the same hardware.
+
+Parallel: execute at exactly the same time. Parallel tasks must be executed on different hardware.
+
+## Module2: Concurrency Basics
+
+### M2.1.1: Processes
+
+Process is an instance of a running program. Things unique to a process:
+- Memory
+- Registers
+
+Processes are running concurrently.
+
+### M2.1.2: Scheduling
+
+Process Scheduling: every process has a turn to be executed.
+
+Context Switching: Control flow changes from one process to another.
+
+### M2.1.3: Threads and Goroutines
+
+![Thread vs Process](https://www.cs.uic.edu/~jbell/CourseNotes/OperatingSystems/images/Chapter4/4_01_ThreadDiagram.jpg)
+
+Threads vs. Processes:
+- Threads share some context
+- Many threads can exist in one process
+
+![Goroutine](https://miro.medium.com/max/1166/1*ntxTfMNaxclAE7AJgBuAtw.png)
+
+**Goroutines**:
+- Like a thread in Go
+- Many Goroutines execute within a single OS thread
+
+Go Runtime Scheduler:
+- Schedules goroutines inside an OS thread
+- Likke a little OS insode a single OS thread
+
+### M2.2.1: Interleavings
+
+![Interleaving](https://3starlearningexperiences.files.wordpress.com/2018/09/interleaving-5.png?w=620)
+
+### M2.2.2: Race Conditions
+
+Outcome depends on non-deterministic ordering.
+
+![Race Condition](https://www.gatevidyalay.com/wp-content/uploads/2018/11/Process-Synchronization-Illustration.png)
+
+Communication Between Tasks:
+- Threads are largely independent but not completely independent
+
+## Module3: Threads in Go
+
+### M3.1.1: Goroutines
+
+Creating a Goroutine:
+- One goroutine is created automatically to execute the **main()**
+- Other goroutines are created using the **go** keyword
+
+```go
+func main() {
+    a := 1
+    go foo()  // main goroutine does not block on call to foo()
+    a = 2
+}
+```
+
+### M3.1.2: Exiting Goroutines
+
+Exiting a Goroutine:
+- A goroutine exits when its code is complete
+- When the main goroutine is completed, all other goroutines exit
+- A goroutine may not complete its executino because main completes early
+
+Early Exit:
+
+```go
+func main() {
+    go fmt.Printf("New routine")
+    fmt.Printf("Main routine")  // only "Main routine" is printed
+}
+```
+
+Delayed Exit:
+
+```go
+func main() {
+    go fmt.Printf("New routine")  // "New routine" is also printed
+    time.Sleep(100 * time.Millisecond)
+    fmt.Printf("Main routine")  // "Main routine" is printed
+}
+```
+
+Timing with Goroutines:
+- Adding a delay to wait for a goroutine is **bad**
+- Timing assumptions may be wrong
+- Timing is not nondeterministic
+- Need formal synchronization constructs
+
+### M3.2.1: Basic Synchronization
+
+## Module4: Synchronized Communication
 
 
 
