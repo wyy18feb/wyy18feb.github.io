@@ -576,7 +576,7 @@ barr, err := json.Marshal(p1)
 if err != nil {
     fmt.Println("error:", err)
 }
-fmt.Printf("%s", barr)  // {"name":"wyy18feb","addr":"a st.","phone":"123"}
+fmt.Printf("%s\n", barr)  // {"name":"wyy18feb","addr":"a st.","phone":"123"}
 
 var p2 Person
 err = json.Unmarshal(barr, &p2)
@@ -625,4 +625,530 @@ barr := []byte{1, 2, 3}
 nb, err := f.Write(barr)
 nb, err := f.WriteString("Hi")
 f.Close()
+```
+
+# Functions, Methods, and Interfaces
+
+## Module1: Functions and Organizations
+
+### M1.1.1: Why Use Functions?
+
+A function is a set of instructions with a name.
+- Reusability
+- Abstraction
+
+### M1.1.2: Function Parameters and Return Values
+
+```go
+func foo() {
+    fmt.Println("Hello, World")
+}
+
+func foo(x int, y int) {
+    fmt.Println(x*y)
+}
+
+func foo(x int) int {
+    return x + 1
+}
+
+func foo(x int) (int, int) {
+    return x, x + 1
+}
+```
+
+### M1.1.3: Call by Value, Reference
+
+Call by Value:
+
+```go
+func foo(y int) {
+    y = y + 1
+}
+
+func main() {
+    x := 2
+    foo(x)
+    fmt.Println(x)  // 2 not changed
+}
+```
+
+Call by Reference:
+
+```go
+func foo(y *int) {
+    *y = *y + 1
+}
+
+func main() {
+    x := 2
+    foo(&x)
+    fmt.Print(x)  // 3 changed
+}
+```
+
+Comparison:
+
+|Call by|Copying Time|Data Encapsulation|
+|----|----|----|
+|Value|depends on the size|only changed in the function|
+|Reference|no need to copy|may be changed|
+
+### M1.1.4: Passing Arrays and Slices
+
+Passing Array Arguments:
+
+```go
+func foo(x [3]int) int {
+    return x[0]
+}
+
+func main() {
+    a := [3]int{1, 2, 3}
+    fmt.Println(foo(a))
+}
+```
+
+Passing Array Pointers:
+
+```go
+func foo(x *[3]int) int {
+    (*x)[0] = (*x)[0] + 1
+}
+
+func main() {
+    a := [3]int{1, 2, 3}
+    foo(&a)
+    fmt.Println(a)
+}
+```
+
+**Passing Slices**:
+
+Slices contain a pointer to the array. Passing a slice copies the pointer.
+
+```go
+func foo(sli []int) {
+    sli[0] = sli[0] + 1
+}
+
+func main() {
+    s := []int{1, 2, 3}
+    foo(s)
+    fmt.Println(s)
+}
+```
+
+### M1.2.1: Well-Written Functions
+
+- Understandability
+- Debugging Principles:
+	1. Function is written incorrectly
+	2. Data that the function uses is incorrect
+- Supporting Debugging:
+	1. Functions need to be understandable
+	2. Data needs to be tracable
+
+### M1.2.2: Guidelines for Functions
+
+- Function Naming
+- Functional Cohesion (only one operation)
+- Few Parameters
+- Reducing Parameter Number
+
+### M1.2.3: Function Guidelines
+
+- Function Complexity
+- Function Length
+- Control-flow Complexity
+- Partitioning Conditionals
+
+## Module2: Function Types
+
+### M2.1.1: First-Class Values
+
+Functions are first-class.
+- Variables as Functions
+```go
+func incFn(x int) int {
+    return x + 1
+}
+
+func main() {
+    var funcVar func(int) int
+    funcVar = incFn  // declare a variable as a func
+    fmt.Println(funcVar(0))
+}
+```
+- Functions as Arguments
+```go
+func applyIt(foo func(int) int, val int) int {
+    return foo(val)
+}
+
+func inc(x int) int {return x + 1}
+func dec(x int) int {return x - 1}
+
+func main() {
+    fmt.Println(applyIt(inc, 1))  // 2
+    fmt.Println(applyIt(dec, 1))  // 0
+}
+```
+- Anonymous Functions
+```go
+func applyIt(foo func(int) int, val int) int {
+    return foo(val)
+}
+
+func main() {
+    fmt.Println(applyIt(func (x int) int {return x - 1}, 1))  // 0
+}
+```
+
+### M2.1.2: Returning Functions
+
+```go
+func MakeDistOrigin(ox float64, oy float64) func (float64, float64) float64 {
+    return func (tx float64, ty float64) float64 {
+        return math.Sqrt(math.Pow(tx-ox, 2) + math.Pow(ty-oy, 2))
+    }
+}
+
+func main() {
+    var foo func(float64, float64) float64
+    foo = MakeDistOrigin(0, 0)
+    fmt.Println(foo(1, 2))  // 2.236
+}
+```
+
+**Closure**:
+
+When functions are passed/returned, their environment comes with them.
+
+```go
+func MakeDistOrigin(ox, oy float64) func (float64, float64) float64 {
+    // Here ox and oy are in the closure of fn
+    fn := func (tx, ty float64) float64 {
+        // we can still get access of ox and oy
+        return math.Sqrt(math.Pow(tx-ox, 2) + math.Pow(ty-oy, 2))
+    }
+    return fn
+}
+```
+
+### M2.2.2: Variadic and Defered
+
+Variable Argument Number:
+
+```go
+func getMax(vals ...int) int {
+    maxV := -1
+    for _, v := range vals {
+        if v > maxV {
+            maxV = v
+        }
+    }
+    return maxV
+}
+```
+
+Variadic Slice Argument:
+
+```go
+func main() {
+    fmt.Println(getMax(1, 3, 6, 4))
+    sli := []int{1, 3, 6, 4}
+    fmt.Println(getMax(sli...))
+}
+```
+
+Deferred Function Calls:
+
+Call can be deferred until the surrounding function completes. It is typically used for cleanup activities.
+
+```go
+func main() {
+    defer fmt.Println("Bye")
+    fmt.Println("Hello")
+    
+    i := 1
+    defer fmt.Println(i)  // the arguments are evaluated right there at once, in this case, i = 1
+    i++
+    fmt.Println(i) // 2
+}
+```
+
+## Module3: Object Orientation in Go
+
+### M3.1.1: Classes and Encapsulation
+
+### M3.1.2: Support for Classes (1)
+
+Associating Methods with Data:
+
+```go
+type MyInt int
+
+func (m MyInt) Double() int {  // (m MyInt) is the receiver type
+    return int(m*2)
+}
+
+func main() {
+    v := MyInt(3)
+    fmt.Println(v.Double())  // 6 (v is copied to the Double function)
+}
+```
+
+### M3.1.3: Support for Classes (2)
+
+Struct types compose data fields with methods.
+
+```go
+type Point struct {
+    x float64
+    y float64
+}
+
+func (p Point) DistToOrig() {
+    t := math.Pow(p.x, 2) + math.Pow(p.y, 2)
+    return math.Sqrt(t)
+}
+
+func main() {
+    p1 := Point(3, 4)
+    fmt.Println(p1.DistToOrig())
+}
+```
+
+### M3.2.1: Encapsulation
+
+Encapsulation is for Controlling Access.
+
+```go
+package data
+var x int = 1
+// define public functions to allow access to hidden data
+func getX() {return x}
+```
+
+```go
+package main
+import "data"
+func main() {
+    fmt.Println(data.getX())
+}
+```
+
+Controlling Access to Structs
+
+```go
+package lib
+
+type Point struct {
+    x float64
+    y float64
+}
+
+func (p *Point) Init(x, y float64) {
+    p.x = x
+    p.y = y
+}
+```
+
+```go
+package main
+
+import (
+    "fmt"
+    "lib"
+)
+
+func main() {
+    var p1 lib.Point
+    p1.Init(1, 2)
+    fmt.Println(p1)
+}
+```
+
+### M3.2.2: Point Receivers
+
+```go
+package lib
+
+type Point struct {
+    x float64
+    y float64
+}
+
+func (p *Point) OffsetX(x float64) {
+    p.x += x
+}
+```
+
+### M3.2.3: Point Receivers, Referencing, Dereferencing
+
+Using Pointer Receivers:
+- All methods for a type have pointer receivers
+**or**
+- All methods for a type have non-pointer receivers
+
+Mixing pointer/non-pointer receivers for a type will get confusing.
+
+## Module4: Interfaces for Abstraction
+
+### M4.1.1: Polymorphism
+
+- **Identical** at a high level of abstraction
+- **Different** at a low level of abstraction
+
+### M4.1.2: Interfaces
+
+Interface are sets of methods signatures:
+- Name, parameters, return values
+- Implementation is **not** defined
+
+Interfaces are used to express conceptual similarity between types.
+
+```go
+type Shape2D interface {
+    Area() float64
+    Perimeter() float64
+}
+type Triangle {...}
+// Triangle type satisfies the Shape2D interface
+func (t Triangle) Area() float64 {...}
+func (t Triangle) Perimeter() float64 {...}
+```
+
+### M4.1.3: Interface vs. Concrete Types
+
+Defining an Interface type:
+
+```go
+type Speaker interface {
+    Speak()
+}
+type Dog struct {name string}
+func (d Dog) Speak() {
+    fmt.Println(d.name)
+}
+
+func main() {
+    var s1 Speaker
+    var d1 = Dog("Brian")
+    s1 = d1
+    s1.Speak()  // Brian
+}
+```
+
+Nil Dynamic Value:
+- Can still call the Speak() method of s1
+- Doesn't need a dynamic value to call
+- Need to **check inside the method**
+
+```go
+func (d Dog) Speak() {
+    if d == nil {
+        fmt.Println('<noise>')
+    } else {
+        fmt.Println(d.name)
+    }
+}
+
+func main() {
+    var s1 Speaker
+    var d1 *Dog  // d1 is a pointer to type Dog
+    s1 = d1  // now s1 has the dynamic type but doesn't have the dynamic value which is nil
+    s1.Speak()  // <noise>
+}
+```
+
+Nil Interface Value:
+- Interface with **nil dynamic type**
+- Cannot call a method, runtime error
+
+```go
+var s1 Speaker  // nil dynamic type
+s1.Speak()  // runtime error!!
+```
+
+### M4.2.1: Using Interfaces
+
+```go
+type Shape2D interface {
+    Area() float64
+    Perimeter() float64
+}
+type Triangle {...}
+func (t Triangle) Area() float64 {...}
+func (t Triangle) Perimeter() float64 {...}
+type Rectangle {...}
+func (t Rectangle) Area() float64 {...}
+func (t Rectangle) Perimeter() float64 {...}
+
+func FitInYard(s Shape2D) bool {
+    if s.Area() > 100 && s.Perimeter() > 40 {
+        return true
+    }
+    return false
+}
+```
+
+Empty Interface:
+- Specifies no methods
+- All types satisfy the empty interface
+
+```go
+func print(val interface{}) {
+    fmt.Println(val)
+}
+```
+
+### M4.2.2: Type Assertions
+
+Exposing Type Differences:
+
+```go
+func DrawShape(s Shape2D) {
+    rect, ok := s.(Rectangle)
+    if ok {
+        DrawRect(rect)
+    }
+    tri, ok := s.(Triangle)
+    if ok {
+        DrawTriangle(tri)
+    }
+}
+```
+
+Type Switch:
+
+```go
+func DrawShape(s Shape2D) {
+    switch sh := s.(type) {
+        case Rectangle:
+            DrawRectangle(sh)
+        case Triangle:
+            DrawTriangle(sh)
+    }
+}
+```
+
+### M4.2.3: Error Handling
+
+Error Interface:
+
+```go
+type error interface {
+    Error()
+}
+```
+
+Handling Errors:
+
+```go
+f, err := os.Open("test.txt")
+if err != nil {
+    fmt.Println(err)
+}
 ```
