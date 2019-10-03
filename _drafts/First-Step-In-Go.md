@@ -629,7 +629,7 @@ f.Close()
 
 # Functions, Methods, and Interfaces
 
-## Module1: Functions and Organizations
+## Module 1: Functions and Organizations
 
 ### M1.1.1: Why Use Functions?
 
@@ -763,7 +763,7 @@ func main() {
 - Control-flow Complexity
 - Partitioning Conditionals
 
-## Module2: Function Types
+## Module 2: Function Types
 
 ### M2.1.1: First-Class Values
 
@@ -884,7 +884,7 @@ func main() {
 }
 ```
 
-## Module3: Object Orientation in Go
+## Module 3: Object Orientation in Go
 
 ### M3.1.1: Classes and Encapsulation
 
@@ -1000,7 +1000,7 @@ Using Pointer Receivers:
 
 Mixing pointer/non-pointer receivers for a type will get confusing.
 
-## Module4: Interfaces for Abstraction
+## Module 4: Interfaces for Abstraction
 
 ### M4.1.1: Polymorphism
 
@@ -1161,7 +1161,7 @@ if err != nil {
 
 # Concurrency in Go
 
-## Module1: Why Use Concurrency?
+## Module 1: Why Use Concurrency?
 
 ### M1.1.1: Parallel Execution
 
@@ -1186,7 +1186,7 @@ Concurrent: start and end time overlap. Concurrent tasks may be executed on the 
 
 Parallel: execute at exactly the same time. Parallel tasks must be executed on different hardware.
 
-## Module2: Concurrency Basics
+## Module 2: Concurrency Basics
 
 ### M2.1.1: Processes
 
@@ -1233,7 +1233,7 @@ Outcome depends on non-deterministic ordering.
 Communication Between Tasks:
 - Threads are largely independent but not completely independent
 
-## Module3: Threads in Go
+## Module 3: Threads in Go
 
 ### M3.1.1: Goroutines
 
@@ -1283,7 +1283,64 @@ Timing with Goroutines:
 
 ### M3.2.1: Basic Synchronization
 
-## Module4: Synchronized Communication
+Synchronization:
+- Using global events whose execution os viewed by all threads simultaneously
+- Global event is viewed by all tasks at the same time
+- Is used to restrict bad interleavings
+
+### M3.2.2: Wait Groups
+
+Sync Package:
+- Contains functions to synchronize between goroutines
+- **sync.WaitGroup** forces a goroutine to wait for other goroutines
+
+```go
+import (
+	"fmt"
+	"sync"
+)
+
+func foo(wg *sync.WaitGroup) {
+	fmt.Println("foo")
+	wg.Done()  // decrements the counter
+}
+
+func main() {
+	var wg sync.WaitGroup
+	wg.Add(1)  // increments the counter
+	go foo(&wg)
+	wg.Wait()  // blocks until counter == 0
+	fmt.Println("main")
+}
+```
+
+### M3.3.1: Communication
+
+Channels:
+- Transfer data between goroutines
+- Channels are typed
+- Use **make()** to create a channel: **c := make(chan int)**
+- Send data on a channel: **c <- 3**
+- Receive data from a channel: **x := <- c**
+
+```go
+func prod(v1 int, v2 int, c chan int) {
+	c <- v1 * v2
+}
+
+func main() {
+	c := make(chan int)
+	go prod(1, 2, c)
+	go prod(3, 4, c)
+	a := <- c
+	b := <- c
+	go prod(a, b, c)
+	res := <- c
+	fmt.Println(res)
+}
+```
+
+## Module 4: Synchronized Communication
 
 
 
