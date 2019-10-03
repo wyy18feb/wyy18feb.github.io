@@ -1296,21 +1296,21 @@ Sync Package:
 
 ```go
 import (
-	"fmt"
-	"sync"
+    "fmt"
+    "sync"
 )
 
 func foo(wg *sync.WaitGroup) {
-	fmt.Println("foo")
-	wg.Done()  // decrements the counter
+    fmt.Println("foo")
+    wg.Done()  // decrements the counter
 }
 
 func main() {
-	var wg sync.WaitGroup
-	wg.Add(1)  // increments the counter
-	go foo(&wg)
-	wg.Wait()  // blocks until counter == 0
-	fmt.Println("main")
+    var wg sync.WaitGroup
+    wg.Add(1)  // increments the counter
+    go foo(&wg)
+    wg.Wait()  // blocks until counter == 0
+    fmt.Println("main")
 }
 ```
 
@@ -1325,23 +1325,268 @@ Channels:
 
 ```go
 func prod(v1 int, v2 int, c chan int) {
-	c <- v1 * v2
+    c <- v1 * v2
 }
 
 func main() {
-	c := make(chan int)
-	go prod(1, 2, c)
-	go prod(3, 4, c)
-	a := <- c
-	b := <- c
-	go prod(a, b, c)
-	res := <- c
-	fmt.Println(res)
+    c := make(chan int)
+    go prod(1, 2, c)
+    go prod(3, 4, c)
+    a := <- c
+    b := <- c
+    go prod(a, b, c)
+    res := <- c
+    fmt.Println(res)
 }
 ```
 
+### M3.3.2: Blocking in Channels
+
+Blocking and Synchronization:
+- Channel communication is synchronous
+- Blocking is the same as waiting for communication
+- Receiving and ignoring the result is same as a **Wait()**
+
+### M3.3.3: Buffered Channels
+
+Channel Capacity:
+- Channels can contain a limited number of objects
+- **Capacity** is the number of objects it can hold in transit
+- Optional argument to make() defines channel capacity: **c := make(chan int, 3)**
+- Sending only blocks if **buffer is full**
+- Receiving only blocks if **buffer is empty**
+
+Use of Buffering:
+- Producer and Consumer do not need to operate at exactly the same speed
+- Speed mismatch is acceptable
+
 ## Module 4: Synchronized Communication
 
+### M4.1.1: Blocking on Channels
 
+Iterating Through a Channel:
 
+```go
+for i := range c {
+    fmt.Println(i)
+}
+```
 
+One iteration each time a new value is received. Iterates when sender calls **close(c)**.
+
+Receiving from Multiple Goroutines:
+- Multiple channels may be used to receive from multiple sources
+- May have a choice of which data to use
+
+```go
+select {
+    case a = <- c1:
+        fmt.Println(a)
+    case b = <- c2:
+        fmt.Println(b)
+}
+```
+
+### M4.1.2: Select
+
+Select Send or Receive:
+
+```go
+select {
+    case a = <- c1:
+        fmt.Println("Received a")
+    case c2 <- b:
+        fmt.Println("Sent b")
+}
+```
+
+Select with an Abort Channel:
+- Use select with a separate abort channel
+- May want to receive data until an abort signal is received
+
+```go
+select {
+    case a = <- c:
+        fmt.Println("Received a")
+    case <- abort:
+        return
+}
+```
+
+Default Select:
+
+```go
+select {
+    case a = <- c1:
+        fmt.Println(a)
+    case b = <- c2:
+        fmt.Println(b)
+    default:
+        fmt.Println("nop")
+}
+```
+
+### M4.2.1: Mutual Exclusion
+
+```go
+var i int
+var wg sync.WaitGroup
+
+func inc() {
+    i = i + 1
+    wg.Done()
+}
+
+func main() {
+    wg.Add(10000)
+    for x := 0; x < 10000; x++ {
+        go inc()
+    }
+    wg.Wait()
+    fmt.Println(i)  // may get 9352 or 9468 or ...
+}
+```
+
+Granularity of Concurrency:
+- Concurrency is at the **machine code level**
+
+### M4.2.2: Mutex
+
+![Mutex](https://miro.medium.com/max/1204/1*8oZNWNSthQCcYrjAXxW2UA.png)
+
+Sync.Mutex:
+- A Mutex ensures mutual exclusion
+- Uses a binary semaphore
+- Flag up - share variable is in use
+- Flag down - shared variable is available
+
+### M4.2.3: Mutex Methods
+
+```go
+var i int
+var wg sync.WaitGroup
+var mut sync.Mutex
+
+func inc() {
+    mut.Lock()
+    i = i + 1
+    mut.Unlock()
+    wg.Done()
+}
+
+func main() {
+    wg.Add(10000)
+    for x := 0; x < 10000; x++ {
+        go inc()
+    }
+    wg.Wait()
+    fmt.Println(i)  // this time it gets 10000
+}
+```
+
+### M4.3.1: Once Synchronization
+
+Sync.Once:
+- Has one method, once.Do(f)
+- Function f is executed **only one time**
+- All calls to **once.Do()** block until the first returns
+
+```go
+var on sync.Once
+var wg sync.WaitGroup
+
+func setup() {
+    fmt.Println("Init")
+}
+
+func dostuff() {
+    on.Do(setup)
+    fmt.Println("hello")
+    wg.Done()
+}
+
+func main() {
+    wg.Add(2)
+    go dostuff()
+    go dostuff()
+    wg.Wait()
+    fmt.Println("main")
+}
+
+/*output:
+Init
+hello
+hello
+main
+*/
+```
+
+### M4.3.2: Deadlock
+
+![Deadlock](https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Process_deadlock.svg/1200px-Process_deadlock.svg.png)
+
+Circular dependencies cause all involved goroutines to block.
+
+```go
+func dostuff(c1 chan int, c2 chan int) {
+    <- c1
+    c2 <- 1
+    wg.Done()
+}
+
+func main() {
+    ch1 := make(chan int)
+    ch2 := make(chan int)
+    wg.Add(2)
+    go dostuff(ch1, ch2)
+    go dostuff(ch2, ch1)
+    wg.Wait()
+}
+```
+
+Deadlock Detection: Golang runtime automatically detects when all goroutines are deadlocked.
+
+### M4.3.3: Dining Philosophers
+
+![Dining Philosephers](https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/An_illustration_of_the_dining_philosophers_problem.png/220px-An_illustration_of_the_dining_philosophers_problem.png)
+
+- Each chopstick is a mutex
+- Each philosepher is associated with a goroutine and two chopsticks
+
+```go
+type Chops struct {sync.Mutex}
+type Philo struct {
+    leftCS, rightCS *Chops
+}
+
+var wg sync.WaitGroup
+
+func (p Philo) eat() {
+    for {
+        p.leftCS.Lock()
+        p.rightCS.Lock()
+        fmt.Println("eating")
+        p.leftCS.Unlock()
+        p.rightCS.Unlock()
+    }
+    wg.Done()
+}
+
+func main() {
+    CSticks := make([]*Chops, 5)
+    for i := 0; i < 5; i++ {
+        CSticks[i] = new(Chops)
+    }
+    philos := make([]*Philo, 5)
+    for i := 0; i < 5; i++ {
+        philos[i] = &Philo{CSticks[i], CSticks[(i+1)%5]}
+    }
+    wg.Add(5)
+    for i := 0; i < 5; i++ {
+        go philos[i].eat()
+    }
+    wg.Done()
+}
+
+// fatal error: all goroutines are asleep - deadlock!
+```
