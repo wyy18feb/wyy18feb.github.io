@@ -49,15 +49,11 @@ sudo apt-get update
 sudo apt-get install ocserv
 ```
 3. 安装GnuTLS
-
 这一步是为了生成密钥 (key) 和证书 (certificate)。
-
 ```bash
 sudo apt-get install gnutls-bin
 ```
-
 4. 生成密钥和证书
-
 进入OCServ的安装目录，创建证书授权模板ca.tmpl。
 
 ```bash
@@ -74,18 +70,14 @@ signing_key
 cert_signing_key
 crl_signing_key
 ```
-
 保存退出后，使用以下命令生成ca的私钥和证书。
-
 ```bash
 # 生成ca的私钥
 sudo certtool --generate-privkey --outfile ca-key.pem
 # 通过ca的私钥和模板生成证书
 sudo certtool --generate-self-signed --load-privkey ca-key.pem --template ca.tmpl --outfile ca-cert.pem
 ```
-
 同样地，创建服务模板server.tmpl。
-
 ```bash
 sudo vim server.tmpl
 ```
@@ -97,16 +89,13 @@ signing_key
 encryption_key
 tls_www_server
 ```
-
 保存退出后，使用以下命令生成server的私钥和证书。
-
 ```bash
 # 生成server的私钥
 sudo certtool --generate-privkey --outfile server-key.pem
 # 通过server的私钥和模板，以及ca的私钥和证书，生成server的证书
 sudo certtool --generate-certificate --load-privkey server-key.pem --load-ca-certificate ca-cert.pem --load-ca-privkey ca-key.pem --template server.tmpl --outfile server-cert.pem
 ```
-
 5. 配置ocserv.conf
 
 ```bash
