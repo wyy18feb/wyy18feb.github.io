@@ -41,13 +41,10 @@ Ocserv运行在Linux环境，安全、轻量、快速，通过SSL安全连接，
 **注意：以下步骤需要root权限**
 
 1. 更新apt源
-
 ```bash
 sudo apt-get update
 ```
-
 2. 安装OCServ
-
 ```bash
 sudo apt-get install ocserv
 ```
