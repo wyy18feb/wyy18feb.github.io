@@ -5,7 +5,7 @@ baseurl:        "/"
 url:            "https://wyy18feb.github.io"
 
 # Google Analytics
-google_analytics:
+google_analytics: UA-149352941-1
 
 # Author
 author:
