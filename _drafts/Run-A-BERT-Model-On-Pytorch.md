@@ -138,7 +138,7 @@ It responses as followed:
 
 # References
 
-- [Start Locally | Pytorch](https://pytorch.org/get-started/locally/)
+- [Start Locally Pytorch](https://pytorch.org/get-started/locally/)
 - [huggingface/transformers Transformers:State-of-the-art Natural Language Processing for TensorFlow 2.0 and PyTorch](https://github.com/huggingface/transformers)
 - [The Stanford Question Answering Dataset](https://rajpurkar.github.io/SQuAD-explorer/)
 - [DEPLOYING PYTORCH IN PYTHON VIA A REST API WITH FLASK](https://pytorch.org/tutorials/intermediate/flask_rest_api_tutorial.html)
